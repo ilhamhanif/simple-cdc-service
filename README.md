@@ -330,7 +330,13 @@ which will do 2 test.
  1. Check row count between 2 table in database, must be EXACTLY SAME.
  2. Check each row between 2 table in database, must be EXACTLY SAME.
 
-This result is shows if data in 2 database is successfully mirrored.
+Test command:
+
+```
+pytest -vv tests/
+```
+
+This result is shown if data in 2 database is successfully mirrored.
 
 ![Tests](./docs/src/img/py_pytest.png)
 
