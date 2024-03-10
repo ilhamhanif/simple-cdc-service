@@ -356,11 +356,6 @@ To deactivate Virtual Environment, use command below.
 deactivate
 ```
 
-## What's Next
-
-There is some field to develop this simple tutorial, leveraging, or compare to other similar service.<br>
-Here some article th
-
 ## Reference
 
 All references (but not limited to) to build this article.
