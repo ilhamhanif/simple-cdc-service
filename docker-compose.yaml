@@ -1,0 +1,74 @@
+version: '3.9'
+services:
+
+  mysql:
+    container_name: mysql
+    image: mysql
+    ports:
+      - 3306:3306 # Used to connect to database
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    volumes:
+        - ./mysql/init-script:/init-script
+    command: --default-authentication-plugin=mysql_native_password --init-file /init-script/script.sql
+
+  debezium:
+    container_name: debezium
+    image: debezium/connect
+    ports:
+      - 8083:8083 # Used to send configuration file through API /connectors
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9092
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: connect_configs
+      OFFSET_STORAGE_TOPIC: connect_offsets
+      STATUS_STORAGE_TOPIC: connect_statuses
+    depends_on:
+      - mysql
+      - kafka
+
+  zookeeper:
+    container_name: zookeeper
+    image: zookeeper
+
+  kafka:
+    container_name: kafka
+    image: bitnami/kafka
+    environment:
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL_SAME_HOST:PLAINTEXT,EXTERNAL_DIFFERENT_HOST:PLAINTEXT
+      # Define who can listen to Kafka
+      KAFKA_CFG_LISTENERS: INTERNAL://:9092,EXTERNAL_SAME_HOST://:29092,EXTERNAL_DIFFERENT_HOST://:29093
+      # Define How client (PRODUCER + CONSUMER) can connect to Kafka from various host
+      KAFKA_CFG_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL_SAME_HOST://localhost:29092,EXTERNAL_DIFFERENT_HOST://kafka:29093
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: INTERNAL
+    healthcheck:
+      test: [
+        "CMD-SHELL", 
+        "kafka-topics.sh --bootstrap-server kafka:9092 --topic healthcheck --create --if-not-exists && kafka-topics.sh --bootstrap-server kafka:9092 --topic healthcheck --describe"
+      ]
+      start_period: 10s
+      interval: 5s
+      timeout: 10s
+      retries: 5
+    restart: always
+    depends_on:
+      - zookeeper
+
+  kafka-consumer:
+    container_name: kafka-consumer
+    build: ./kafka-consumer-service
+    command: python /app/main.py
+    depends_on:
+      debezium:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+
+  clickhouse:
+    container_name: clickhouse
+    image: clickhouse/clickhouse-server
+    ports:
+      - 8123:8123 # For Client and HTTP Interface
+    volumes:
+      - ./clickhouse/init-script:/docker-entrypoint-initdb.d/ # Database Initial Script
