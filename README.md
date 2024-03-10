@@ -340,7 +340,7 @@ This result is shown if data in 2 database is successfully mirrored.
 
 ![Tests](./docs/src/img/py_pytest.png)
 
-Or you can do default query within 2 database.
+Or you can do query within 2 database.
 
 ### 5. Clean Up
 
