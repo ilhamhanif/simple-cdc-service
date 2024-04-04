@@ -13,11 +13,11 @@ Complete architecture is shows below.
 
 This architecture include:
 
- - [MySQL](https://dev.mysql.com/) as source Database
- - [Debezium](https://debezium.io/) as CDC tools.
- - [Apache Kafka](https://kafka.apache.org/) as message broker.
- - A Python base Kafka consumer.
- - [ClickHouse](https://clickhouse.com/) as target database.
+-   [MySQL](https://dev.mysql.com/) as source Database
+-   [Debezium](https://debezium.io/) as CDC tools.
+-   [Apache Kafka](https://kafka.apache.org/) as message broker.
+-   A Python base Kafka consumer.
+-   [ClickHouse](https://clickhouse.com/) as target database.
 
 The infrastructure is served inside docker container,<br> which compiled using `docker-compose.yaml` script, for ease of use.<br>
 
@@ -36,19 +36,19 @@ MySQL database is used as source database with container configuration as mentio
     environment:
       - MYSQL_ROOT_PASSWORD=root
     volumes:
-        - ./mysql/init-script:/init-script
+      - ./mysql/init-script:/init-script
     command: --default-authentication-plugin=mysql_native_password --init-file /init-script/script.sql
 ```
 
 Explanation:
 
- - Container name: **mysql**.
- - Port 3306 is exposed to automate data update using `sequencer.py` (will explain later).
- - Default database root password is *root*. 
-   [Click here](https://hub.docker.com/_/mysql) (scroll until section **Environment Variable**) to change MySQL configuration using Environment Variable.
- - Directory `./mysql/init-script` contains `script.sql` as initial script.<br>
-   Therefore, this folder is mounted in `/init-script`,<br> 
-   and configure the `docker-compose.yaml` file to run `script.sql` using command **--init-file**.<br>
+-   Container name: **mysql**.
+-   Port 3306 is exposed to automate data update using `sequencer.py` (will explain later).
+-   Default database root password is _root_.
+    [Click here](https://hub.docker.com/_/mysql) (scroll until section **Environment Variable**) to change MySQL configuration using Environment Variable.
+-   Directory `./mysql/init-script` contains `script.sql` as initial script.<br>
+    Therefore, this folder is mounted in `/init-script`,<br>
+    and configure the `docker-compose.yaml` file to run `script.sql` using command **--init-file**.<br>
 
 #### Debezium
 
@@ -73,11 +73,12 @@ Debezium container is configured as below.
 ```
 
 Explanation:
- - Container name: **debezium**.
- - Port 8083 is exposed to setup the debezium-mysql-connector using *curl* (will explain later).
- - From [this article](https://debezium.io/documentation/reference/stable/tutorial.html#starting-kafka-connect), it is **IMPORTANT** to set<br>
-   GROUP_ID, CONFIG_STORAGE_TOPIC, STATUS_STORAGE_TOPIC as Environment Variable
- - This container startup is depends on other container, named **mysql** (source database), and **kafka** (message broker).
+
+-   Container name: **debezium**.
+-   Port 8083 is exposed to setup the debezium-mysql-connector using _curl_ (will explain later).
+-   From [this article](https://debezium.io/documentation/reference/stable/tutorial.html#starting-kafka-connect), it is **IMPORTANT** to set<br>
+    GROUP_ID, CONFIG_STORAGE_TOPIC, STATUS_STORAGE_TOPIC as Environment Variable
+-   This container startup is depends on other container, named **mysql** (source database), and **kafka** (message broker).
 
 #### Apache Kafka
 
@@ -103,7 +104,7 @@ Kafka container is configured as below.
       KAFKA_CFG_INTER_BROKER_LISTENER_NAME: INTERNAL
     healthcheck:
       test: [
-        "CMD-SHELL", 
+        "CMD-SHELL",
         "kafka-topics.sh --bootstrap-server kafka:9092 --topic healthcheck --create --if-not-exists && kafka-topics.sh --bootstrap-server kafka:9092 --topic healthcheck --describe"
       ]
       start_period: 10s
@@ -116,16 +117,17 @@ Kafka container is configured as below.
 ```
 
 Explanation:
- - Container name: **kafka**.
- - Kafka is having dependency to run with [Apache Zookeeper](https://zookeeper.apache.org/),<br>
-   used to maintain take care of Kafka configuration like active broker, topics, consumers, etc.<br>
-   Kafka communicate with Zookeeper using internal docker port 2181.
- - Environment Variable:
-    - KAFKA_CFG_LISTENERS is used to control which source can connect with Kafka.
-    - KAFKA_CFG_ADVERTISED_LISTENERS is used to define how client application can connect with Kafka.
-    - other Environment Variable configuration purpose <br>
-      is mentioned in [this documentation](https://hub.docker.com/r/bitnami/kafka) (scroll until section Configuration/Environment Variables).
- - Healthcheck is also made to make sure HA.
+
+-   Container name: **kafka**.
+-   Kafka is having dependency to run with [Apache Zookeeper](https://zookeeper.apache.org/),<br>
+    used to maintain take care of Kafka configuration like active broker, topics, consumers, etc.<br>
+    Kafka communicate with Zookeeper using internal docker port 2181.
+-   Environment Variable:
+    -   KAFKA_CFG_LISTENERS is used to control which source can connect with Kafka.
+    -   KAFKA_CFG_ADVERTISED_LISTENERS is used to define how client application can connect with Kafka.
+    -   other Environment Variable configuration purpose <br>
+        is mentioned in [this documentation](https://hub.docker.com/r/bitnami/kafka) (scroll until section Configuration/Environment Variables).
+-   Healthcheck is also made to make sure HA.
 
 #### Kafka Consumer
 
@@ -145,10 +147,11 @@ Kafka consumer written in python is configured as below.
 ```
 
 Explanation:
- - Container name: **kafka-consumer**.
- - This container startup is depends on **debezium** and **kafka**.
-    - debezium service should be started.
-    - kafka service should be healthy.
+
+-   Container name: **kafka-consumer**.
+-   This container startup is depends on **debezium** and **kafka**.
+    -   debezium service should be started.
+    -   kafka service should be healthy.
 
 #### Database ClickHouse
 
@@ -166,12 +169,12 @@ CLickHouse database is used as target database with container configuration as m
 
 Explanation:
 
- - Container name: **mysql**.
- - Port 8123 is exposed for external connection outside docker environment to connect.
- - Directory **./clickhouse/init-script** contains `script.sql` as initial script.<br>
-   Therefore, this folder is mounted in **/docker-entrypoint-initdb.d** inside container,<br> 
-   and all `*.sql` inside this folder will be treated as initial script.<br>
-   source: [Documentation](https://hub.docker.com/r/clickhouse/clickhouse-server/) (scroll until *How to extend this image*).
+-   Container name: **mysql**.
+-   Port 8123 is exposed for external connection outside docker environment to connect.
+-   Directory **./clickhouse/init-script** contains `script.sql` as initial script.<br>
+    Therefore, this folder is mounted in **/docker-entrypoint-initdb.d** inside container,<br>
+    and all `*.sql` inside this folder will be treated as initial script.<br>
+    source: [Documentation](https://hub.docker.com/r/clickhouse/clickhouse-server/) (scroll until _How to extend this image_).
 
 ## Build Up Steps
 
@@ -222,11 +225,12 @@ docker compose build && docker compose up -d
 ```
 
 Note:
- - command `-d` is used for detached mode, so there is no build and up logs printed in terminal.<br>
-   To access logs for specific container, use ```docker container logs [container name]```
+
+-   command `-d` is used for detached mode, so there is no build and up logs printed in terminal.<br>
+    To access logs for specific container, use `docker container logs [container name]`
 
 After process build and up, make sure all of the container is started and not exited,<br>
-using ```docker container ls```
+using `docker container ls`
 
 ![Docker Container List](./docs/src/img/docker_container_up.png)
 
@@ -235,11 +239,11 @@ using ```docker container ls```
 After we make sure all of service in container is started successfully, we are ready to start our journey.<br>
 Here is summary of what we will do to use and test this simple sequence of service.
 
- 1. Inspect source database MySQL and target database Clickhouse.
- 2. Create debezium connector.
- 3. Run a data sequencer.
- 4. Test the data consistency between 2 database.
- 5. Clean Up
+1.  Inspect source database MySQL and target database Clickhouse.
+2.  Create debezium connector.
+3.  Run a data sequencer.
+4.  Test the data consistency between 2 database.
+5.  Clean Up
 
 ### Inspect Source Database MySQL and Target Database CLickHouse
 
@@ -284,16 +288,17 @@ And make sure we have same response here.
 ![Debezium Create Connector](./docs/src/img/debezium_create_connector.png)
 
 Explanation:
- - Connector name: mysql-schema-dev-connector
- - Source database: mysql:3306 with login username `root` and password `root`
- - Captured database: dev
- - Kafka broker location: kafka:9092
- - Kafka broker topic name prefix: source<br>
-   By default, it will make a topic with format follows rule `source.[database-name].[table-name]`, <br>
-   so each table each database, will have different topic.
- - Skipped operation: none<br>
-   By default, TRUNCATE operation is ignored by debezium related to this [documentation](https://debezium.io/documentation/reference/stable/connectors/mysql.html#mysql-property-skipped-operations).
- - The other is following default configuration from this [tutorial](https://debezium.io/documentation/reference/stable/tutorial.html#deploying-mysql-connector).
+
+-   Connector name: mysql-schema-dev-connector
+-   Source database: mysql:3306 with login username `root` and password `root`
+-   Captured database: dev
+-   Kafka broker location: kafka:9092
+-   Kafka broker topic name prefix: source<br>
+    By default, it will make a topic with format follows rule `source.[database-name].[table-name]`, <br>
+    so each table each database, will have different topic.
+-   Skipped operation: none<br>
+    By default, TRUNCATE operation is ignored by debezium related to this [documentation](https://debezium.io/documentation/reference/stable/connectors/mysql.html#mysql-property-skipped-operations).
+-   The other is following default configuration from this [tutorial](https://debezium.io/documentation/reference/stable/tutorial.html#deploying-mysql-connector).
 
 The configuration use connection to mysql in mysql:3306 and to kafka in kafka:9092 instead to localhost, because we are using [internal docker network](https://docs.docker.com/network/).
 
@@ -313,8 +318,8 @@ This sequencer will do loops until 1800 loop, with each loop do one of insert/up
 Any data changes in result from this sequencer will be captured by Debezium and then forwarded to Kafka.<br>
 A Kafka subscriber service then capture this message, and do 2 things in target database ClickHouse.
 
- 1. Insert all original message from kafka into tabel **dev.kafka_message_log**.
- 2. Using information from the message, perform insert/update/delete record in table **dev.invoice**.
+1.  Insert all original message from kafka into tabel **dev.kafka_message_log**.
+2.  Using information from the message, perform insert/update/delete record in table **dev.invoice**.
 
 Example of kafka message for each method is stored in `./kafka-consumer-service/example/`.<br>
 
@@ -327,8 +332,8 @@ in source database.
 Here i made a simple python test script in `/tests/test_consistency.py` using [pytest](https://docs.pytest.org/en/8.0.x/)<br>
 which will do 2 test.
 
- 1. Check row count between 2 table in database, must be EXACTLY SAME.
- 2. Check each row between 2 table in database, must be EXACTLY SAME.
+1.  Check row count between 2 table in database, must be EXACTLY SAME.
+2.  Check each row between 2 table in database, must be EXACTLY SAME.
 
 Test command:
 
@@ -360,16 +365,16 @@ deactivate
 
 All references (but not limited to) to build this article.
 
- - https://hub.docker.com/_/mysql
- - https://hub.docker.com/r/debezium/connect
- - https://hub.docker.com/r/bitnami/kafka
- - https://hub.docker.com/r/clickhouse/clickhouse-server/
- - and many more, thanks to all.
+-   https://hub.docker.com/_/mysql
+-   https://hub.docker.com/r/debezium/connect
+-   https://hub.docker.com/r/bitnami/kafka
+-   https://hub.docker.com/r/clickhouse/clickhouse-server/
+-   and many more, thanks to all.
 
 ## Another Related Topic
 
- - [Basic CDC Approach](https://medium.com/data-engineering-indonesia/cdc-and-scd-approach-to-enhancing-expedition-operations-3a75256c2b74)
- - [Performing Million of Message using Kafka CDC](https://medium.com/yotpoengineering/scheduling-millions-of-messages-with-kafka-debezium-6d1a105160c)
- - [Common Data Performing Use Case for CDC](https://www.ascend.io/blog/common-change-data-capture-usage-patterns/)
- - [Google Cloud Platform Managed CDC](https://cloud.google.com/datastream?hl=en)
- - [How to Use GCP Managed CDC Datastream](https://techbigdatacloud.medium.com/change-data-capture-real-time-data-transfer-to-bigquery-with-gcp-datastream-97127fa837e3)
+-   [Basic CDC Approach](https://medium.com/data-engineering-indonesia/cdc-and-scd-approach-to-enhancing-expedition-operations-3a75256c2b74)
+-   [Performing Million of Message using Kafka CDC](https://medium.com/yotpoengineering/scheduling-millions-of-messages-with-kafka-debezium-6d1a105160c)
+-   [Common Data Performing Use Case for CDC](https://www.ascend.io/blog/common-change-data-capture-usage-patterns/)
+-   [Google Cloud Platform Managed CDC](https://cloud.google.com/datastream?hl=en)
+-   [How to Use GCP Managed CDC Datastream](https://techbigdatacloud.medium.com/change-data-capture-real-time-data-transfer-to-bigquery-with-gcp-datastream-97127fa837e3)
