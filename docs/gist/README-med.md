@@ -2,31 +2,31 @@
 
 ## Behind Story
 
-In many cases, data from applications, or interfaces, stored in an OLTP database right after it was captured.<br>
-Because of the analytical needs, sometimes, we need to move the data into an analytic-base database OLAP.<br>
+In many cases, data from applications, or interfaces, stored in an OLTP database right after it was captured.
+Because of the analytical needs, sometimes, we need to move the data into an analytic-base database OLAP.
 The problem is, the query used to fetch the data, consumes too many memories and makes the application going slow.
 
 This figure shows data transaction trend within last 30 days (in thousand).
 
-![Daily Data Transaction Trend](./docs/src/img/data_transaction_trend.png)
+![Daily Data Transaction Trend](https://github.com/ilhamhanif/simple-cdc-service/blob/main/docs/src/img/data_transaction_trend.png?raw=true)
 
-The solution we will explain in this article is to stream any data changes in OLTP database to OLAP database<br>
+The solution we will explain in this article is to stream any data changes in OLTP database to OLAP database
 using a Change Data Capture (CDC).
 
 ## What's This Article Goal?
 
-This article will explain on how to use a **simple Change Data Capture (CDC) Debezium** to capture any data changes from an OLTP database MySql,<br>
+This article will explain on how to use a **simple Change Data Capture (CDC) Debezium** to capture any data changes from an OLTP database MySql,
 and use the data-stream information to synchronize the data with OLAP database.
 
 ## Source Code
 
-This article source code stored in [this repository](./).
+This article source code stored in [this repository](https://github.com/ilhamhanif/simple-cdc-service/blob/main/).
 
 ## Architecture
 
 This figure shows complete architecture of our solution.
 
-![Architecture](./docs/src/img/architecture.png)
+![Architecture](https://github.com/ilhamhanif/simple-cdc-service/blob/main/docs/src/img/architecture.png?raw=true)
 
 List of services in this solution were listed below.
 
@@ -36,7 +36,7 @@ List of services in this solution were listed below.
 -   A Python base Kafka consumer.
 -   [ClickHouse](https://clickhouse.com/) as a sample of OLAP database.
 
-All of the services run inside docker container, which predefined on `docker-compose.yaml` script.<br>
+All of the services run inside docker container, which predefined on `docker-compose.yaml` script.
 
 ### Deep Dive with the Services
 
@@ -63,11 +63,11 @@ Explanation:
 -   Port 3306 will be exposed to automate data modification using `sequencer.py` (it is explained below).
 -   Default database password is _root_.
     [Click here](https://hub.docker.com/_/mysql) (do scroll until section _Environment Variable_) to change MySql configuration using Environment Variable.
--   Directory `./mysql/init-script` contains `script.sql` as initial script.<br>
+-   Directory `./mysql/init-script` contains `script.sql` as initial script.
 
 #### Debezium
 
-Debezium plays as main actor in this solution.<br>
+Debezium plays as main actor in this solution.
 It will capture any data changes, including INSERT/CREATE, UPDATE, DELETE, and TRUNCATE from MySql database.
 
 ```
@@ -91,14 +91,14 @@ Explanation:
 
 -   Service name: **debezium**.
 -   Port 8083 will be exposed to setup the debezium-mysql-connector using _curl_ (will explain later).
--   From [this article](https://debezium.io/documentation/reference/stable/tutorial.html#starting-kafka-connect), it is **IMPORTANT** to set<br>
+-   From [this article](https://debezium.io/documentation/reference/stable/tutorial.html#starting-kafka-connect), it is **IMPORTANT** to set
     GROUP_ID, CONFIG_STORAGE_TOPIC, STATUS_STORAGE_TOPIC as Environment Variable
 -   The service start condition is depends with other services, **mysql** (source database) and **kafka** (message broker).
 
 #### Apache Kafka
 
-Apache Kafka act as a bridge-like message broker in this solution.<br>
-It delivers all debezium messages, contains any data changes from database.<br>
+Apache Kafka act as a bridge-like message broker in this solution.
+It delivers all debezium messages, contains any data changes from database.
 Kafka consumer then consumes the message right after the message is being publish to Kafka.
 
 ```
@@ -134,8 +134,8 @@ Kafka consumer then consumes the message right after the message is being publis
 Explanation:
 
 -   Service name: **kafka**.
--   Kafka has dependency with [Apache Zookeeper](https://zookeeper.apache.org/).<br>
-    Zookeeper has responsibility to maintain the Kafka service components like active brokers, topics, consumers, etc.<br>
+-   Kafka has dependency with [Apache Zookeeper](https://zookeeper.apache.org/).
+    Zookeeper has responsibility to maintain the Kafka service components like active brokers, topics, consumers, etc.
     Kafka communicates with Zookeeper using internal docker port 2181.
 -   Environment Variable:
     -   KAFKA_CFG_LISTENERS used to control which source can connect with Kafka.
@@ -144,7 +144,7 @@ Explanation:
 
 #### Kafka Consumer
 
-Kafka Consumer was written with Python [`kafka-python`](https://pypi.org/project/kafka-python/) PyPi modules.<br>
+Kafka Consumer was written with Python [`kafka-python`](https://pypi.org/project/kafka-python/) PyPi modules.
 
 ```
   kafka-consumer:
@@ -181,9 +181,9 @@ Explanation:
 
 -   Service name: **mysql**.
 -   Port 8123 exposed for external connection outside docker environment connect.
--   Directory `./clickhouse/init-script` contains `script.sql` as initial script.<br>
-    It is mounted in `/docker-entrypoint-initdb.d` inside container,<br>
-    and all `*.sql` under this folder are treated as initial script.<br>
+-   Directory `./clickhouse/init-script` contains `script.sql` as initial script.
+    It is mounted in `/docker-entrypoint-initdb.d` inside container,
+    and all `*.sql` under this folder are treated as initial script.
     source: [Documentation](https://hub.docker.com/r/clickhouse/clickhouse-server/) (scroll until _How to extend this image_ section).
 
 ## Build
@@ -224,7 +224,7 @@ Make sure docker is already installed using command below.
 docker --version
 ```
 
-![Docker Version](./docs/src/img/docker_version.png)
+![Docker Version](https://github.com/ilhamhanif/simple-cdc-service/blob/main/docs/src/img/docker_version.png?raw=true)
 
 If docker was not installed, follow [this documentation](https://docs.docker.com/engine/install/) for installation process.
 
@@ -236,7 +236,7 @@ docker compose build && docker compose up -d
 
 Note:
 
--   When command `-d` used, there will be no build and log printed in terminal.<br>
+-   When command `-d` used, there will be no build and log printed in terminal.
     To access log for specific service, use `docker container logs [service name]`
 
 ## Demonstration
@@ -251,24 +251,24 @@ Below is an order of what demonstration we will do.
 
 ### Inspecting Source Database MySql and Target Database CLickHouse
 
-Before we start, we have to check source database MySql and target database ClickHouse,<br>
+Before we start, we have to check source database MySql and target database ClickHouse,
 to make sure, our initial script for each database is run successfully.
 
 #### MySql Database
 
-A database **dev** and a table **invoice** is already preinstalled by script in `./mysql/init-script/script.sql`.<br>
+A database **dev** and a table **invoice** is already preinstalled by script in `./mysql/init-script/script.sql`.
 Database was accessible thru `localhost:3306` with username _root_ and password _root_ as defined in `docker-compose.yaml` file.
 I checked using tools [Dbeaver](https://dbeaver.io/).
 
-![MySql DB Table Check](./docs/src/img/mysql_check.png)
+![MySql DB Table Check](https://github.com/ilhamhanif/simple-cdc-service/blob/main/docs/src/img/mysql_check.png?raw=true)
 
 #### ClickHouse Database
 
-A database **dev** and a table **invoice** and **kafka_message_log** is already preinstalled by script in `./clickhouse/init-script/db-table-init.sql`.<br>
+A database **dev** and a table **invoice** and **kafka_message_log** is already preinstalled by script in `./clickhouse/init-script/db-table-init.sql`.
 Database was accessible thru `localhost:8123` with username `default` and without any password as defined in `docker-compose.yaml` file.
 I checked using same tools [Dbeaver](https://dbeaver.io/).
 
-![ClicHouse DB Table Check](./docs/src/img/clickhouse_check.png)
+![ClicHouse DB Table Check](https://github.com/ilhamhanif/simple-cdc-service/blob/main/docs/src/img/clickhouse_check.png?raw=true)
 
 ### 2. Creating a Debezium Connector Configuration
 
@@ -278,9 +278,9 @@ Debezium needs a configuration, contains information listed below.
 2. Data changes included operation
 3. Kafka location
 
-To simplify the process, i have made a simple bash script `debezium-config-push.sh`.<br>
-This script basicly does a HTTP POST request using [curl](https://curl.se/) to debezium config push endpoint in `localhost:8123`<br>
-with the connector configuration as request body.<br>
+To simplify the process, i have made a simple bash script `debezium-config-push.sh`.
+This script basicly does a HTTP POST request using [curl](https://curl.se/) to debezium config push endpoint in `localhost:8123`
+with the connector configuration as request body.
 
 Run the script with command below.
 
@@ -290,7 +290,7 @@ bash debezium-config.push.sh
 
 Make sure we have the same response here.
 
-![Debezium Create Connector](./docs/src/img/debezium_create_connector.png)
+![Debezium Create Connector](https://github.com/ilhamhanif/simple-cdc-service/blob/main/docs/src/img/debezium_create_connector.png?raw=true)
 
 Explanation:
 
@@ -298,39 +298,39 @@ Explanation:
 -   Source database location: mysql:3306 with login username _root_ and password _root_
 -   Database name: dev
 -   Kafka location: kafka:9092
--   Kafka topic name prefix: source<br>
-    By default, debezium will made a topic with format `source.[database-name].[table-name]` after configuration pushed,<br>
+-   Kafka topic name prefix: source
+    By default, debezium will made a topic with format `source.[database-name].[table-name]` after configuration pushed,
     therefore, each table in each database, will have a different topic.
--   Operation included: all<br>
+-   Operation included: all
     By default, [TRUNCATE operation ignored by debezium](https://debezium.io/documentation/reference/stable/connectors/mysql.html#mysql-property-skipped-operations).
 -   Other configuration is follows [this documentation](https://debezium.io/documentation/reference/stable/tutorial.html#deploying-mysql-connector).
 
 ### 3. Running the Data Sequencer
 
-Sequencer was made to automatically did multiple random DML (1800 DML) statement of INSERT/UPDATE/DELETE record to MySql database.<br>
-The sequencer had written using Python as `sequencer.py`.<br>
+Sequencer was made to automatically did multiple random DML (1800 DML) statement of INSERT/UPDATE/DELETE record to MySql database.
+The sequencer had written using Python as `sequencer.py`.
 Run the script using command below.
 
 ```
 python sequencer.py
 ```
 
-![Running Sequencer](./docs/src/img/py_sequencer.png)
+![Running Sequencer](https://github.com/ilhamhanif/simple-cdc-service/blob/main/docs/src/img/py_sequencer.png?raw=true)
 
-Any database record changes will be captured by Debezium, before forwarded to Kafka.<br>
-A Kafka subscriber service able to fetch data forwarded to Kafka via its subscriber,<br>
+Any database record changes will be captured by Debezium, before forwarded to Kafka.
+A Kafka subscriber service able to fetch data forwarded to Kafka via its subscriber,
 and do action corresponds the data it capture.
 
 1.  Insert all original message from kafka into tabel **dev.kafka_message_log**.
 2.  Using information from the message, perform INSERT/UPDATE/DELETE record in table **dev.invoice** corresponds with the data.
 
-Example of kafka message for each method store in `./kafka-consumer-service/example/`.<br>
+Example of kafka message for each method store in `./kafka-consumer-service/example/`.
 
 ### 4. Testing Data Consistency between 2 Database
 
 After sequencer finished, database ClickHouse and MySql will had EXACTLY SAME records under the same table.
 
-I've made a simple python test script in `/tests/test_consistency.py` using [pytest](https://docs.pytest.org/en/8.0.x/)<br>.
+I've made a simple python test script in `/tests/test_consistency.py` using [pytest](https://docs.pytest.org/en/8.0.x/).
 This test script had 2 tests.
 
 1.  Check row count between 2 table in database. It must be EXACTLY SAME.
@@ -344,7 +344,7 @@ pytest -vv tests/
 
 Success test was shown in this image.
 
-![Tests](./docs/src/img/py_pytest.png)
+![Tests](https://github.com/ilhamhanif/simple-cdc-service/blob/main/docs/src/img/py_pytest.png?raw=true)
 
 ### 5. Cleaning Up
 
