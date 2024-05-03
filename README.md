@@ -165,7 +165,7 @@ Explanation:
 
 #### Database ClickHouse
 
-CLickHouse has a role as target database.
+ClickHouse has a role as target database.
 
 ```
   clickhouse:
@@ -188,10 +188,10 @@ Explanation:
 
 ## Build
 
-1. Create an empty directory as workspace.
+1. Clone the source code from GitHub Repository.
 
 ```
-mkdir simple-cdc-service
+git clone https://github.com/ilhamhanif/simple-cdc-service.git
 cd simple-cdc-service
 ```
 
@@ -202,13 +202,7 @@ python -m venv .
 . /bin/activate
 ```
 
-3. Clone the source code from GitHub Repository.
-
-```
-git clone https://github.com/ilhamhanif/simple-cdc-service.git
-```
-
-4. Install some Python modules.
+3. Install some Python modules.
 
 Important Python modules listed in `requirements.txt
 
@@ -216,7 +210,7 @@ Important Python modules listed in `requirements.txt
 pip install -r requirements.txt
 ```
 
-5. Build and start all services.
+4. Build and start all services.
 
 Make sure docker is already installed using command below.
 
@@ -249,7 +243,7 @@ Below is an order of what demonstration we will do.
 4.  Testing the data consistency between 2 database.
 5.  Cleaning Up
 
-### Inspecting Source Database MySql and Target Database CLickHouse
+### Inspecting Source Database MySql and Target Database ClickHouse
 
 Before we start, we have to check source database MySql and target database ClickHouse,<br>
 to make sure, our initial script for each database is run successfully.
